@@ -1,11 +1,14 @@
 package lk.ac.mrt.cse.dbs.simpleexpensemanager.data.impl;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.TransactionDAO;
+import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.Account;
 import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.ExpenseType;
 import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.Transaction;
 
@@ -30,11 +33,25 @@ public class SQLiteTransactionDAO implements TransactionDAO {
 
     @Override
     public List<Transaction> getAllTransactionLogs() {
-        return null;
+        Cursor resultSet = db.rawQuery("Select * from Account",null);
+        List<Transaction> result = new ArrayList<Transaction>();
+        while(!resultSet.isAfterLast())
+        {
+            result.add( new Transaction(new Date(resultSet.getString(4)),resultSet.getString(1),((resultSet.getString(2)=="INCOME")?ExpenseType.INCOME:ExpenseType.EXPENSE), Double.parseDouble(resultSet.getString(3) ) ));
+            resultSet.moveToNext();
+        }
+        return result;
     }
 
     @Override
     public List<Transaction> getPaginatedTransactionLogs(int limit) {
-        return null;
+        Cursor resultSet = db.rawQuery("Select * from Account ORDER BY DATE LIMIT "+limit,null);
+        List<Transaction> result = new ArrayList<Transaction>();
+        while(!resultSet.isAfterLast())
+        {
+            result.add( new Transaction(new Date(resultSet.getString(4)),resultSet.getString(1),((resultSet.getString(2)=="INCOME")?ExpenseType.INCOME:ExpenseType.EXPENSE), Double.parseDouble(resultSet.getString(3) ) ));
+            resultSet.moveToNext();
+        }
+        return result;
     }
 }
