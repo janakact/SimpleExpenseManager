@@ -20,12 +20,12 @@ import android.support.annotation.NonNull;
 /**
  * Created by Janaka on 04/12/2015.
  */
-public class SQLLiteAccountDAO implements AccountDAO {
+public class SQLiteAccountDAO implements AccountDAO {
     SQLiteDatabase db;
 
-    public  SQLLiteAccountDAO()
+    public SQLiteAccountDAO()
     {
-        db = SQLiteDatabase.openOrCreateDatabase("account_db",null);
+        db = SQLiteDatabase.openOrCreateDatabase("130594B",null);
         db.execSQL("CREATE TABLE IF NOT EXISTS Account(accountNo VARCHAR,bankName VARCHAR,accountHolderName VARCHAR, balance NUMERIC(10,2));");
     }
 
@@ -48,7 +48,7 @@ public class SQLLiteAccountDAO implements AccountDAO {
         while(!resultSet.isAfterLast())
         {
 
-           // result.add( new Account());
+            result.add( new Account(resultSet.getString(1),resultSet.getString(2),resultSet.getString(3), Double.parseDouble(resultSet.getString(4) ) ));
             resultSet.moveToNext();
         }
         return result;
@@ -56,21 +56,32 @@ public class SQLLiteAccountDAO implements AccountDAO {
 
     @Override
     public Account getAccount(String accountNo) throws InvalidAccountException {
-        return null;
+            Cursor resultSet = db.rawQuery("Select * from Account where accountNo=" + accountNo, null);
+            if (resultSet.isAfterLast()) {
+                throw new InvalidAccountException("Account No:" + accountNo + " is not valid!");
+            }
+            return new Account(resultSet.getString(1), resultSet.getString(2), resultSet.getString(3), Double.parseDouble(resultSet.getString(4)));
     }
 
     @Override
     public void addAccount(Account account) {
-
+        db.execSQL("INSERT INTO Account VALUES('"+account.getAccountNo()+"','"+account.getBankName()+"','"+account.getAccountHolderName()+"','"+account.getBalance()+"');");
     }
 
     @Override
     public void removeAccount(String accountNo) throws InvalidAccountException {
-
+        db.execSQL("DELETE FROM Account WHERE accountNo="+accountNo);
     }
 
     @Override
     public void updateBalance(String accountNo, ExpenseType expenseType, double amount) throws InvalidAccountException {
+        Account account = getAccount(accountNo);
 
+        double balance = account.getBalance();
+        if (ExpenseType.INCOME == expenseType) {
+            balance += amount;
+        } else
+            balance-=amount;
+        db.execSQL("UPDATE Account SET balance="+balance+" WHERE accountNo="+accountNo);
     }
 }
