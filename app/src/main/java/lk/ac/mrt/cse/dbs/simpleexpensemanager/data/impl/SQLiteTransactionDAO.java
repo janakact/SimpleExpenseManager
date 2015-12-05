@@ -23,7 +23,7 @@ public class SQLiteTransactionDAO implements TransactionDAO {
     java.io.File filename = Constants.CONTEXT.getFilesDir();
     public SQLiteTransactionDAO()
     {
-        db = SQLiteDatabase.openOrCreateDatabase(filename.getAbsolutePath() + "/mydb.sqlite", null);
+        db = SQLiteDatabase.openOrCreateDatabase(filename.getAbsolutePath() + "/db_130594B.sqlite", null);
        // db.execSQL("CREATE TABLE IF NOT EXISTS Trans(accountNo VARCHAR(50),expenseType VARCHAR(50));");
         db.execSQL("CREATE TABLE IF NOT EXISTS Transactions(accountNo VARCHAR(50),expenseType VARCHAR(50),amount NUMERIC(10,2), date_value Date);");
     }
