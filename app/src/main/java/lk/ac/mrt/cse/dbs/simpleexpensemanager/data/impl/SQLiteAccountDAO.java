@@ -27,7 +27,7 @@ public class SQLiteAccountDAO implements AccountDAO {
     java.io.File filename = Constants.CONTEXT.getFilesDir();
     public SQLiteAccountDAO()
     {
-        db = SQLiteDatabase.openOrCreateDatabase(filename.getAbsolutePath() + "/mydb.sqlite", null);
+        db = SQLiteDatabase.openOrCreateDatabase(filename.getAbsolutePath() + "/db_130594B.sqlite", null);
         db.execSQL("CREATE TABLE IF NOT EXISTS Account(accountNo VARCHAR(50),bankName VARCHAR(50),accountHolderName VARCHAR(50), balance NUMERIC(10,2));");
     }
 
