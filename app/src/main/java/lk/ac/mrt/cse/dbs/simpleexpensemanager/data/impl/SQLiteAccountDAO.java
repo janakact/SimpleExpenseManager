@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import lk.ac.mrt.cse.dbs.simpleexpensemanager.Constants;
 import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.AccountDAO;
 import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.exception.InvalidAccountException;
 import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.Account;
@@ -15,6 +16,7 @@ import lk.ac.mrt.cse.dbs.simpleexpensemanager.data.model.ExpenseType;
 
 import android.database.Cursor;
 import  android.database.sqlite.*;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 
 /**
@@ -22,20 +24,21 @@ import android.support.annotation.NonNull;
  */
 public class SQLiteAccountDAO implements AccountDAO {
     SQLiteDatabase db;
-
+    java.io.File filename = Constants.CONTEXT.getFilesDir();
     public SQLiteAccountDAO()
     {
-        db = SQLiteDatabase.openOrCreateDatabase("130594B",null);
-        db.execSQL("CREATE TABLE IF NOT EXISTS Account(accountNo VARCHAR,bankName VARCHAR,accountHolderName VARCHAR, balance NUMERIC(10,2));");
+        db = SQLiteDatabase.openOrCreateDatabase(filename.getAbsolutePath() + "/mydb.sqlite", null);
+        db.execSQL("CREATE TABLE IF NOT EXISTS Account(accountNo VARCHAR(50),bankName VARCHAR(50),accountHolderName VARCHAR(50), balance NUMERIC(10,2));");
     }
 
     @Override
     public List<String> getAccountNumbersList() {
         Cursor resultSet = db.rawQuery("Select accountNo from Account",null);
         List<String> result = new ArrayList<String>();
+        resultSet.moveToFirst();
         while(!resultSet.isAfterLast())
         {
-            result.add(resultSet.getString(1));
+            result.add(resultSet.getString(0));
             resultSet.moveToNext();
         }
         return result;
@@ -43,12 +46,13 @@ public class SQLiteAccountDAO implements AccountDAO {
 
     @Override
     public List<Account> getAccountsList() {
-        Cursor resultSet = db.rawQuery("Select * from Account",null);
+        Cursor resultSet = db.rawQuery("Select * from Account;",null);
         List<Account> result = new ArrayList<Account>();
+        resultSet.moveToFirst();
         while(!resultSet.isAfterLast())
         {
 
-            result.add( new Account(resultSet.getString(1),resultSet.getString(2),resultSet.getString(3), Double.parseDouble(resultSet.getString(4) ) ));
+            result.add( new Account(resultSet.getString(0),resultSet.getString(1),resultSet.getString(2), Double.parseDouble(resultSet.getString(3) ) ));
             resultSet.moveToNext();
         }
         return result;
@@ -56,11 +60,12 @@ public class SQLiteAccountDAO implements AccountDAO {
 
     @Override
     public Account getAccount(String accountNo) throws InvalidAccountException {
-            Cursor resultSet = db.rawQuery("Select * from Account where accountNo=" + accountNo, null);
+            Cursor resultSet = db.rawQuery("Select * from Account where accountNo='" + accountNo+"';", null);
+            resultSet.moveToFirst();
             if (resultSet.isAfterLast()) {
                 throw new InvalidAccountException("Account No:" + accountNo + " is not valid!");
             }
-            return new Account(resultSet.getString(1), resultSet.getString(2), resultSet.getString(3), Double.parseDouble(resultSet.getString(4)));
+            return new Account(resultSet.getString(0), resultSet.getString(1), resultSet.getString(2), Double.parseDouble(resultSet.getString(3)));
     }
 
     @Override
@@ -70,7 +75,7 @@ public class SQLiteAccountDAO implements AccountDAO {
 
     @Override
     public void removeAccount(String accountNo) throws InvalidAccountException {
-        db.execSQL("DELETE FROM Account WHERE accountNo="+accountNo);
+        db.execSQL("DELETE FROM Account WHERE accountNo='"+accountNo+"';");
     }
 
     @Override
@@ -82,6 +87,6 @@ public class SQLiteAccountDAO implements AccountDAO {
             balance += amount;
         } else
             balance-=amount;
-        db.execSQL("UPDATE Account SET balance="+balance+" WHERE accountNo="+accountNo);
+        db.execSQL("UPDATE Account SET balance='"+balance+"' WHERE accountNo='"+accountNo+"';");
     }
 }
